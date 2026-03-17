@@ -984,6 +984,31 @@
     }
     .booking-whatsapp-link:hover { color: var(--cyan); }
 
+    /* ─────────────────── MOBILE NAV ─────────────────── */
+    .nav-mobile-open .nav-links {
+      display: flex !important;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--darkest);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    .nav-mobile-open .nav-links a { font-size: 20px; letter-spacing: 0.15em; }
+    .nav-mobile-open .nav-links .nav-cta-mobile {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: var(--font-display); font-size: 14px;
+      font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--darkest); background: var(--cyan);
+      padding: 14px 32px; text-decoration: none; cursor: pointer; border: none;
+    }
+    .nav-hamburger { position: relative; z-index: 1001; }
+    .nav-mobile-open .nav-hamburger span:nth-child(1) { transform: rotate(45deg) translate(5px, 4px); }
+    .nav-mobile-open .nav-hamburger span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-mobile-open .nav-hamburger span:nth-child(3) { transform: rotate(-45deg) translate(5px, -4px); }
+
     /* ─────────────────── MOBILE ─────────────────── */
     @media (max-width: 900px) {
       .nav-links { display: none; }
@@ -1103,11 +1128,12 @@
           <li><a href="#automations">IA</a></li>
           <li><a href="#leads">Leads</a></li>
           <li><a href="#trust">Clientes</a></li>
+          <li><a href="#" class="nav-cta-mobile open-modal">Agendar reunión →</a></li>
         </ul>
         <a href="#" class="nav-cta open-modal">Agendar reunión</a>
-        <div class="nav-hamburger" id="hamburger">
+        <button class="nav-hamburger" id="hamburger" aria-label="Menú">
           <span></span><span></span><span></span>
-        </div>
+        </button>
       </div>
     </div>
   </nav>
@@ -1682,6 +1708,15 @@
       document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
     });
 
+    // ─── HAMBURGER ───
+    const hamburger = document.getElementById('hamburger');
+    hamburger.addEventListener('click', () => {
+      document.getElementById('navbar').classList.toggle('nav-mobile-open');
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => document.getElementById('navbar').classList.remove('nav-mobile-open'));
+    });
+
     // ─── SCROLL REVEAL ───
     const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
     const observer = new IntersectionObserver(entries => {
@@ -1758,12 +1793,13 @@
       }
     }
 
-    function selectDate(dateStr, dateObj) {
+    async function selectDate(dateStr, dateObj) {
       selectedDate = dateStr;
       const dayName = DAYS_ES[dateObj.getDay()];
       document.getElementById('selected-date-display').textContent =
         dayName.charAt(0).toUpperCase() + dayName.slice(1) + ' ' + dateObj.getDate() + ' de ' + MONTHS_ES[dateObj.getMonth()];
-      renderTimeSlots(); showStep('step-time');
+      showStep('step-time');
+      await renderTimeSlots();
       if (typeof fbq !== 'undefined') fbq('trackCustom', 'BookingDateSelected');
     }
 
@@ -1779,16 +1815,32 @@
     });
 
     // ─── TIME SLOTS ───
-    function renderTimeSlots() {
-      const container = document.getElementById('time-slots'); container.innerHTML = '';
+    async function renderTimeSlots() {
+      const container = document.getElementById('time-slots');
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.4);font-size:13px;padding:20px;">Cargando horarios...</div>';
+
+      let busySlots = [];
+      try {
+        const r = await fetch(`/api/availability?date=${selectedDate}`);
+        const data = await r.json();
+        busySlots = data.busySlots || [];
+      } catch (e) { /* si falla, mostrar todos disponibles */ }
+
+      container.innerHTML = '';
       for (let h = 9; h < 18; h++) {
         for (let m = 0; m < 60; m += 30) {
           if (h === 17 && m === 30) break;
           const timeStr = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+          const isBusy = busySlots.includes(timeStr);
           const el = document.createElement('button');
-          el.className = 'time-slot' + (timeStr === selectedTime ? ' selected' : '');
           el.type = 'button'; el.textContent = timeStr;
-          el.addEventListener('click', () => selectTime(timeStr));
+          el.className = 'time-slot' + (timeStr === selectedTime ? ' selected' : '') + (isBusy ? ' disabled' : '');
+          if (isBusy) {
+            el.disabled = true;
+            el.style.cssText = 'opacity:0.3;cursor:not-allowed;text-decoration:line-through;';
+          } else {
+            el.addEventListener('click', () => selectTime(timeStr));
+          }
           container.appendChild(el);
         }
       }
@@ -1803,7 +1855,7 @@
     }
 
     document.getElementById('back-to-date').addEventListener('click', () => { renderCalendar(); showStep('step-date'); });
-    document.getElementById('back-to-time').addEventListener('click', () => { renderTimeSlots(); showStep('step-time'); });
+    document.getElementById('back-to-time').addEventListener('click', async () => { await renderTimeSlots(); showStep('step-time'); });
 
     // ─── FORM SUBMIT ───
     document.getElementById('booking-form').addEventListener('submit', async (e) => {
