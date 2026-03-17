@@ -1757,7 +1757,11 @@
     // ─── MODAL ───
     const modal = document.getElementById('modal');
 
-    function openModal() { modal.classList.add('active'); resetBooking(); }
+    function openModal() {
+      modal.classList.add('active');
+      resetBooking();
+      if (typeof fbq !== 'undefined') fbq('trackCustom', 'MeetButton');
+    }
     function closeModal() { modal.classList.remove('active'); }
 
     document.querySelectorAll('.open-modal').forEach(btn =>
