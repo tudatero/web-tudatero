@@ -186,7 +186,10 @@
     }
     .nav-cta:hover { background: var(--cyan); color: var(--darkest); }
 
-    .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: none; }
+    .nav-hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      background: none; border: none; padding: 4px; outline: none;
+    }
     .nav-hamburger span { width: 24px; height: 1.5px; background: var(--white); display: block; transition: 0.3s; }
 
     /* ─────────────────── HERO ─────────────────── */
@@ -1743,6 +1746,7 @@
     let selectedTime = null;
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
+    const availabilityCache = {};
 
     const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const DAYS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -1787,7 +1791,8 @@
         } else {
           if (date.toDateString() === today.toDateString()) el.classList.add('today');
           if (dateStr === selectedDate) el.classList.add('selected');
-          el.addEventListener('click', () => selectDate(dateStr, date));
+          el.addEventListener('mouseenter', () => prefetchAvailability(dateStr));
+        el.addEventListener('click', () => selectDate(dateStr, date));
         }
         container.appendChild(el);
       }
@@ -1814,6 +1819,15 @@
       renderCalendar();
     });
 
+    // ─── AVAILABILITY PREFETCH ───
+    function prefetchAvailability(dateStr) {
+      if (availabilityCache[dateStr] !== undefined) return;
+      availabilityCache[dateStr] = fetch(`/api/availability?date=${dateStr}`)
+        .then(r => r.json())
+        .then(d => d.busySlots || [])
+        .catch(() => []);
+    }
+
     // ─── TIME SLOTS ───
     async function renderTimeSlots() {
       const container = document.getElementById('time-slots');
@@ -1821,9 +1835,8 @@
 
       let busySlots = [];
       try {
-        const r = await fetch(`/api/availability?date=${selectedDate}`);
-        const data = await r.json();
-        busySlots = data.busySlots || [];
+        prefetchAvailability(selectedDate);
+        busySlots = await availabilityCache[selectedDate];
       } catch (e) { /* si falla, mostrar todos disponibles */ }
 
       container.innerHTML = '';
