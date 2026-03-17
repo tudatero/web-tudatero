@@ -26,12 +26,13 @@
       --ease: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    html { scroll-behavior: smooth; overflow-x: hidden; }
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: var(--font-body);
       background: var(--darkest);
       color: var(--white);
+      overflow-x: clip;
       cursor: none;
     }
 
