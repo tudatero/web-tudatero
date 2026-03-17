@@ -32,9 +32,9 @@
       font-family: var(--font-body);
       background: var(--darkest);
       color: var(--white);
-      overflow-x: clip;
       cursor: none;
     }
+    #page-content { overflow-x: hidden; }
 
     /* ─────────────────── CUSTOM CURSOR ─────────────────── */
     .cursor-dot {
@@ -1014,6 +1014,7 @@
 
     /* ─────────────────── MOBILE ─────────────────── */
     @media (max-width: 900px) {
+      nav { background: rgba(22,22,22,0.95); backdrop-filter: blur(20px); }
       .nav-links { display: none; }
       .nav-cta { display: none; }
       .nav-hamburger { display: flex; }
@@ -1141,6 +1142,7 @@
     </div>
   </nav>
 
+  <div id="page-content">
   <!-- HERO -->
   <section id="hero">
     <div class="hero-bg">
@@ -1686,6 +1688,8 @@
       </div>
     </div>
   </footer>
+
+  </div><!-- /#page-content -->
 
   <script>
     // ─── CURSOR ───
