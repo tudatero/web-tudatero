@@ -1746,7 +1746,8 @@
     let selectedTime = null;
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
-    const availabilityCache = {};
+    const availabilityCache = {}; // keyed by "YYYY-MM"
+    const busyByDay = {};         // keyed by "YYYY-MM-DD" → ["HH:MM", ...]
 
     const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
     const DAYS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -1767,6 +1768,7 @@
 
     // ─── CALENDAR ───
     function renderCalendar() {
+      fetchMonthAvailability(currentYear, currentMonth + 1);
       document.getElementById('cal-month-year').textContent = MONTHS_ES[currentMonth] + ' ' + currentYear;
       const container = document.getElementById('cal-days');
       container.innerHTML = '';
@@ -1791,8 +1793,7 @@
         } else {
           if (date.toDateString() === today.toDateString()) el.classList.add('today');
           if (dateStr === selectedDate) el.classList.add('selected');
-          el.addEventListener('mouseenter', () => prefetchAvailability(dateStr));
-        el.addEventListener('click', () => selectDate(dateStr, date));
+          el.addEventListener('click', () => selectDate(dateStr, date));
         }
         container.appendChild(el);
       }
@@ -1819,32 +1820,31 @@
       renderCalendar();
     });
 
-    // ─── AVAILABILITY PREFETCH ───
-    function prefetchAvailability(dateStr) {
-      if (availabilityCache[dateStr] !== undefined) return;
-      availabilityCache[dateStr] = fetch(`/api/availability?date=${dateStr}`)
+    // ─── AVAILABILITY: fetch mes completo ───
+    function fetchMonthAvailability(year, month) {
+      const key = `${year}-${month}`;
+      if (availabilityCache[key]) return availabilityCache[key];
+      availabilityCache[key] = fetch(`/api/availability?year=${year}&month=${month}`)
         .then(r => r.json())
-        .then(d => d.busySlots || [])
-        .catch(() => []);
+        .then(d => { Object.assign(busyByDay, d.busyByDay || {}); })
+        .catch(() => {});
+      return availabilityCache[key];
     }
 
     // ─── TIME SLOTS ───
     async function renderTimeSlots() {
       const container = document.getElementById('time-slots');
-      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.4);font-size:13px;padding:20px;">Cargando horarios...</div>';
 
-      let busySlots = [];
-      try {
-        prefetchAvailability(selectedDate);
-        busySlots = await availabilityCache[selectedDate];
-      } catch (e) { /* si falla, mostrar todos disponibles */ }
+      // Si el mes todavía está cargando, esperamos (caso edge: click muy rápido en móvil)
+      const key = `${currentYear}-${currentMonth + 1}`;
+      if (availabilityCache[key]) await availabilityCache[key];
 
       container.innerHTML = '';
       for (let h = 9; h < 18; h++) {
         for (let m = 0; m < 60; m += 30) {
           if (h === 17 && m === 30) break;
           const timeStr = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
-          const isBusy = busySlots.includes(timeStr);
+          const isBusy = (busyByDay[selectedDate] || []).includes(timeStr);
           const el = document.createElement('button');
           el.type = 'button'; el.textContent = timeStr;
           el.className = 'time-slot' + (timeStr === selectedTime ? ' selected' : '') + (isBusy ? ' disabled' : '');
