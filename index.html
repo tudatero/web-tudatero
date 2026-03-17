@@ -863,47 +863,126 @@
     .modal {
       background: var(--darker);
       border: 1px solid rgba(92,225,230,0.2);
-      padding: 56px 48px; width: 90%; max-width: 520px;
+      padding: 2rem; width: 90%; max-width: 420px;
       position: relative;
       transform: scale(0.9) translateY(20px);
       transition: transform 0.4s var(--ease);
+      min-height: 480px; display: flex; flex-direction: column;
     }
     .modal-overlay.active .modal { transform: scale(1) translateY(0); }
     .modal-close {
       position: absolute; top: 20px; right: 24px;
       background: none; border: none;
       color: rgba(255,255,255,0.4); font-size: 22px;
-      cursor: none; transition: color 0.3s; line-height: 1;
+      cursor: pointer; transition: color 0.3s; line-height: 1; z-index: 1;
     }
     .modal-close:hover { color: var(--cyan); }
     .modal h3 {
-      font-family: var(--font-display); font-size: 28px;
+      font-family: var(--font-display); font-size: 24px;
       font-weight: 800; letter-spacing: -0.02em;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .modal h3 em { font-style: normal; color: var(--cyan); }
-    .modal p {
-      font-size: 14px; line-height: 1.7;
-      color: rgba(255,255,255,0.5); margin-bottom: 32px;
+
+    /* Booking steps */
+    .booking-step { display: flex; flex-direction: column; gap: 1rem; flex: 1; }
+    .booking-step.hidden { display: none !important; }
+    .booking-subtitle { color: rgba(255,255,255,0.45); font-size: 13px; margin: 0; }
+    .back-btn {
+      background: none; border: none; color: var(--cyan);
+      cursor: pointer; font-size: 13px; padding: 0;
+      text-align: left; font-family: inherit; width: fit-content;
     }
-    .modal-options { display: flex; flex-direction: column; gap: 12px; }
-    .modal-option {
-      display: flex; align-items: center; gap: 16px;
-      padding: 16px 20px;
+    .back-btn:hover { opacity: 0.7; }
+
+    /* Calendar */
+    .booking-calendar {
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.08);
-      text-decoration: none; color: var(--white);
-      transition: all 0.3s; cursor: none;
+      border-radius: 10px; padding: 1rem;
     }
-    .modal-option:hover { border-color: var(--cyan); background: rgba(92,225,230,0.05); }
-    .modal-option-icon { font-size: 22px; flex-shrink: 0; }
-    .modal-option-text { flex: 1; }
-    .modal-option-title {
-      font-family: var(--font-display); font-size: 14px; font-weight: 700;
+    .cal-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.75rem; font-weight: 600; font-size: 14px;
     }
-    .modal-option-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-    .modal-option-arrow { color: var(--cyan); transition: transform 0.3s; }
-    .modal-option:hover .modal-option-arrow { transform: translateX(4px); }
+    .cal-arrow {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px; color: #fff; cursor: pointer;
+      width: 28px; height: 28px; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .cal-arrow:hover { background: rgba(0,229,255,0.15); }
+    .cal-weekdays {
+      display: grid; grid-template-columns: repeat(7,1fr);
+      text-align: center; font-size: 11px; color: rgba(255,255,255,0.3);
+      margin-bottom: 6px;
+    }
+    .cal-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+    .cal-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; font-size: 12px; cursor: pointer;
+      transition: background 0.15s, color 0.15s; border: 1px solid transparent;
+    }
+    .cal-day:hover:not(.disabled):not(.empty) {
+      background: rgba(0,229,255,0.15); border-color: rgba(0,229,255,0.3);
+    }
+    .cal-day.today { border-color: rgba(0,229,255,0.4); color: var(--cyan); }
+    .cal-day.selected { background: var(--cyan); color: #0a0a0a; font-weight: 700; border-color: var(--cyan); }
+    .cal-day.disabled { color: rgba(255,255,255,0.15); cursor: not-allowed; pointer-events: none; }
+    .cal-day.empty { pointer-events: none; }
+
+    /* Time slots */
+    .time-slots {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+      max-height: 240px; overflow-y: auto;
+    }
+    .time-slot {
+      padding: 0.5rem 0.25rem; text-align: center;
+      border-radius: 7px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03); cursor: pointer;
+      font-size: 13px; transition: all 0.15s; color: rgba(255,255,255,0.8);
+      font-family: inherit;
+    }
+    .time-slot:hover { border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.08); color: #fff; }
+    .time-slot.selected { background: var(--cyan); border-color: var(--cyan); color: #0a0a0a; font-weight: 700; }
+
+    /* Form */
+    #booking-form { display: flex; flex-direction: column; gap: 10px; }
+    #booking-form input {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: #fff; font-family: inherit;
+      font-size: 14px; padding: 0.7rem 1rem; outline: none; transition: border-color 0.2s;
+    }
+    #booking-form input:focus { border-color: var(--cyan); }
+    #booking-form input::placeholder { color: rgba(255,255,255,0.3); }
+    .btn-confirm {
+      background: var(--cyan); border: none; border-radius: 8px;
+      color: #0a0a0a; cursor: pointer; font-family: inherit;
+      font-size: 14px; font-weight: 700; padding: 0.85rem;
+      margin-top: 4px; transition: opacity 0.2s, transform 0.1s; width: 100%;
+    }
+    .btn-confirm:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .form-legal { color: rgba(255,255,255,0.25); font-size: 11px; text-align: center; margin: 0; }
+
+    /* Success */
+    .booking-success {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; gap: 0.75rem; padding: 1rem 0; flex: 1; justify-content: center;
+    }
+    .success-icon {
+      width: 60px; height: 60px;
+      background: rgba(0,229,255,0.12); border: 2px solid var(--cyan);
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 1.6rem; color: var(--cyan);
+    }
+    .success-sub { color: rgba(255,255,255,0.4); font-size: 13px; }
+    .booking-whatsapp-link {
+      color: rgba(255,255,255,0.3); font-size: 12px;
+      text-decoration: none; text-align: center; transition: color 0.2s; margin-top: auto;
+    }
+    .booking-whatsapp-link:hover { color: var(--cyan); }
 
     /* ─────────────────── MOBILE ─────────────────── */
     @media (max-width: 900px) {
@@ -950,26 +1029,63 @@
   <div class="modal-overlay" id="modal">
     <div class="modal">
       <button class="modal-close" id="modalClose">✕</button>
-      <h3>Agendá tu <em>reunión</em></h3>
-      <p>Elegí cómo preferís conectarnos. Una charla de 30 min puede cambiarlo todo.</p>
-      <div class="modal-options">
-        <a href="https://calendar.app.google/MTHve7Dagd8nwMJ99" target="_blank" class="modal-option">
-          <div class="modal-option-icon">📅</div>
-          <div class="modal-option-text">
-            <div class="modal-option-title">Google Calendar</div>
-            <div class="modal-option-sub">Reunión virtual · 30 minutos</div>
+
+      <!-- PASO 1: Fecha -->
+      <div class="booking-step" id="step-date">
+        <h3>Agendá tu <em>reunión</em></h3>
+        <p class="booking-subtitle">Reunión virtual · 30 minutos · Lunes a viernes</p>
+        <div class="booking-calendar">
+          <div class="cal-nav">
+            <button class="cal-arrow" id="cal-prev">&#8592;</button>
+            <span id="cal-month-year"></span>
+            <button class="cal-arrow" id="cal-next">&#8594;</button>
           </div>
-          <div class="modal-option-arrow">→</div>
-        </a>
-        <a href="https://wa.link/765n59" target="_blank" class="modal-option">
-          <div class="modal-option-icon">💬</div>
-          <div class="modal-option-text">
-            <div class="modal-option-title">WhatsApp directo</div>
-            <div class="modal-option-sub">Hablamos al instante</div>
+          <div class="cal-weekdays">
+            <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sa</span><span>Do</span>
           </div>
-          <div class="modal-option-arrow">→</div>
+          <div class="cal-days" id="cal-days"></div>
+        </div>
+        <a href="https://wa.link/765n59" target="_blank" class="booking-whatsapp-link">
+          ¿Preferís WhatsApp? Escribinos &#8594;
         </a>
       </div>
+
+      <!-- PASO 2: Horario -->
+      <div class="booking-step hidden" id="step-time">
+        <button class="back-btn" id="back-to-date">&#8592; Cambiar fecha</button>
+        <h3>Elegí un <em>horario</em></h3>
+        <p class="booking-subtitle" id="selected-date-display"></p>
+        <div class="time-slots" id="time-slots"></div>
+      </div>
+
+      <!-- PASO 3: Datos -->
+      <div class="booking-step hidden" id="step-form">
+        <button class="back-btn" id="back-to-time">&#8592; Cambiar horario</button>
+        <h3>Tus <em>datos</em></h3>
+        <p class="booking-subtitle" id="selected-datetime-display"></p>
+        <form id="booking-form">
+          <input type="text" id="book-name" placeholder="Nombre y apellido" required autocomplete="name">
+          <input type="email" id="book-email" placeholder="Email" required autocomplete="email">
+          <input type="tel" id="book-phone" placeholder="Teléfono (opcional)" autocomplete="tel">
+          <button type="submit" class="btn-confirm" id="btn-confirm">
+            <span id="btn-confirm-text">Confirmar reunión</span>
+            <span id="btn-confirm-loading" style="display:none">Agendando...</span>
+          </button>
+        </form>
+        <p class="form-legal">Al confirmar, recibís un email con el link de la videollamada.</p>
+      </div>
+
+      <!-- PASO 4: Éxito -->
+      <div class="booking-step hidden" id="step-success">
+        <div class="booking-success">
+          <div class="success-icon">&#10003;</div>
+          <h3>¡Reunión <em>agendada</em>!</h3>
+          <p id="success-details" style="color:rgba(255,255,255,0.7); font-size:14px;"></p>
+          <p class="success-sub">Revisá tu email para ver el link de la videollamada.</p>
+          <button class="btn-confirm" id="btn-close-success" style="max-width:200px;">Cerrar</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1575,12 +1691,150 @@
 
     // ─── MODAL ───
     const modal = document.getElementById('modal');
-    document.querySelectorAll('.open-modal').forEach(btn => {
-      btn.addEventListener('click', e => { e.preventDefault(); modal.classList.add('active'); });
+
+    function openModal() { modal.classList.add('active'); resetBooking(); }
+    function closeModal() { modal.classList.remove('active'); }
+
+    document.querySelectorAll('.open-modal').forEach(btn =>
+      btn.addEventListener('click', e => { e.preventDefault(); openModal(); })
+    );
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    document.getElementById('btn-close-success').addEventListener('click', closeModal);
+
+    // ─── BOOKING STATE ───
+    let selectedDate = null;
+    let selectedTime = null;
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+
+    const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const DAYS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+    function showStep(id) {
+      document.querySelectorAll('.booking-step').forEach(s => s.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function resetBooking() {
+      selectedDate = null; selectedTime = null;
+      const now = new Date();
+      currentMonth = now.getMonth(); currentYear = now.getFullYear();
+      renderCalendar();
+      showStep('step-date');
+      document.getElementById('booking-form').reset();
+    }
+
+    // ─── CALENDAR ───
+    function renderCalendar() {
+      document.getElementById('cal-month-year').textContent = MONTHS_ES[currentMonth] + ' ' + currentYear;
+      const container = document.getElementById('cal-days');
+      container.innerHTML = '';
+      const today = new Date(); today.setHours(0,0,0,0);
+      const maxDate = new Date(today); maxDate.setDate(maxDate.getDate() + 60);
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const offset = (firstDay === 0) ? 6 : firstDay - 1;
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      for (let i = 0; i < offset; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'cal-day empty'; container.appendChild(empty);
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(currentYear, currentMonth, d);
+        const dateStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        const dow = date.getDay();
+        const el = document.createElement('div');
+        el.className = 'cal-day'; el.textContent = d;
+        if (dow === 0 || dow === 6 || date < today || date > maxDate) {
+          el.classList.add('disabled');
+        } else {
+          if (date.toDateString() === today.toDateString()) el.classList.add('today');
+          if (dateStr === selectedDate) el.classList.add('selected');
+          el.addEventListener('click', () => selectDate(dateStr, date));
+        }
+        container.appendChild(el);
+      }
+    }
+
+    function selectDate(dateStr, dateObj) {
+      selectedDate = dateStr;
+      const dayName = DAYS_ES[dateObj.getDay()];
+      document.getElementById('selected-date-display').textContent =
+        dayName.charAt(0).toUpperCase() + dayName.slice(1) + ' ' + dateObj.getDate() + ' de ' + MONTHS_ES[dateObj.getMonth()];
+      renderTimeSlots(); showStep('step-time');
+      if (typeof fbq !== 'undefined') fbq('trackCustom', 'BookingDateSelected');
+    }
+
+    document.getElementById('cal-prev').addEventListener('click', () => {
+      const now = new Date();
+      if (currentYear === now.getFullYear() && currentMonth === now.getMonth()) return;
+      currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar();
     });
-    document.getElementById('modalClose').addEventListener('click', () => modal.classList.remove('active'));
-    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('active'); });
+    document.getElementById('cal-next').addEventListener('click', () => {
+      currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderCalendar();
+    });
+
+    // ─── TIME SLOTS ───
+    function renderTimeSlots() {
+      const container = document.getElementById('time-slots'); container.innerHTML = '';
+      for (let h = 9; h < 18; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          if (h === 17 && m === 30) break;
+          const timeStr = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+          const el = document.createElement('button');
+          el.className = 'time-slot' + (timeStr === selectedTime ? ' selected' : '');
+          el.type = 'button'; el.textContent = timeStr;
+          el.addEventListener('click', () => selectTime(timeStr));
+          container.appendChild(el);
+        }
+      }
+    }
+
+    function selectTime(time) {
+      selectedTime = time;
+      document.getElementById('selected-datetime-display').textContent =
+        document.getElementById('selected-date-display').textContent + ' · ' + time + ' hs';
+      showStep('step-form');
+      if (typeof fbq !== 'undefined') fbq('trackCustom', 'BookingTimeSelected');
+    }
+
+    document.getElementById('back-to-date').addEventListener('click', () => { renderCalendar(); showStep('step-date'); });
+    document.getElementById('back-to-time').addEventListener('click', () => { renderTimeSlots(); showStep('step-time'); });
+
+    // ─── FORM SUBMIT ───
+    document.getElementById('booking-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-confirm');
+      const btnText = document.getElementById('btn-confirm-text');
+      const btnLoading = document.getElementById('btn-confirm-loading');
+      btn.disabled = true; btnText.style.display = 'none'; btnLoading.style.display = 'inline';
+
+      const name = document.getElementById('book-name').value.trim();
+      const email = document.getElementById('book-email').value.trim();
+      const phone = document.getElementById('book-phone').value.trim();
+
+      try {
+        const res = await fetch('/api/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, date: selectedDate, time: selectedTime }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error desconocido');
+
+        document.getElementById('success-details').textContent =
+          document.getElementById('selected-date-display').textContent + ' a las ' + selectedTime + ' hs';
+        showStep('step-success');
+        if (typeof fbq !== 'undefined') fbq('track', 'Lead', { content_name: 'reunion_agendada' });
+      } catch (err) {
+        alert(err.message || 'No se pudo agendar. Intentá de nuevo.');
+        btn.disabled = false; btnText.style.display = 'inline'; btnLoading.style.display = 'none';
+      }
+    });
 
     // ─── PARALLAX HERO GLOW ───
     document.addEventListener('mousemove', e => {
