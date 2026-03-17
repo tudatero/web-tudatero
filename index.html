@@ -988,24 +988,29 @@
     .booking-whatsapp-link:hover { color: var(--cyan); }
 
     /* ─────────────────── MOBILE NAV ─────────────────── */
+    /* Cuando el menú mobile está abierto, el nav se expande a pantalla completa */
+    .nav-mobile-open {
+      bottom: 0 !important;
+      background: var(--darkest) !important;
+      backdrop-filter: none !important;
+    }
+    .nav-mobile-open .nav-inner { align-items: flex-start; padding-top: 4px; }
     .nav-mobile-open .nav-links {
       display: flex !important;
       flex-direction: column;
-      position: fixed;
+      position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--darkest);
-      z-index: 999;
       align-items: center;
       justify-content: center;
-      gap: 40px;
+      gap: 40px; list-style: none;
     }
-    .nav-mobile-open .nav-links a { font-size: 20px; letter-spacing: 0.15em; }
+    .nav-mobile-open .nav-links a { font-size: 20px; letter-spacing: 0.15em; color: rgba(255,255,255,0.8); }
     .nav-mobile-open .nav-links .nav-cta-mobile {
       display: inline-flex; align-items: center; gap: 10px;
       font-family: var(--font-display); font-size: 14px;
       font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
       color: var(--darkest); background: var(--cyan);
-      padding: 14px 32px; text-decoration: none; cursor: pointer; border: none;
+      padding: 14px 32px; text-decoration: none;
     }
     .nav-hamburger { position: relative; z-index: 1001; }
     .nav-mobile-open .nav-hamburger span:nth-child(1) { transform: rotate(45deg) translate(5px, 4px); }
